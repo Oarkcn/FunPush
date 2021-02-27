@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+</head>
+<body>
+
+    <form onsubmit="return false">
+        <textarea id = "response" style="height: 400px;width: 600px;"></textarea>
+        <textarea name = "message" style="height: 200px;width: 600px"></textarea>
+        <input type="button" value="发送" onclick="sendmsg(this.form.message)">
+        <input type="button" value="清空" onclick="document.getElementById('response').value=''">
+    </form>
+    <script>
+        var socket;
+        //也许换用 sockjs？
+        var t1 = window.setInterval("reconn()",3000);
+        //判断当前浏览器支持
+        if(window.WebSocket){
+            var response = document.getElementById('response');
+            connect();
+
+        }else{
+            alert("no support!")
+        }
+
+        function connect(){
+            socket = new WebSocket("ws://127.0.0.1:7069/web");
+            socket.onmessage = function (ev) {
+                response.value = response.value + "\n" +ev.data;
+            }
+            socket.onopen=function (ev){
+                response.value = response.value + "\n" +"连接成功！";
+            }
+            socket.onclose = function (ev){
+                response.value = response.value + "\n" +"连接断开！";
+
+            }
+            socket.onerror = function (ev){
+                alert("连接出错！"+ev.data);
+            }
+        }
+        function reconn(){
+            if(window.WebSocket){
+                if(window.socket){
+                    if (socket.readyState == WebSocket.OPEN){
+
+                    }else if (socket.readyState ==WebSocket.CONNECTING){
+
+                    }else{
+                        response.value = response.value + "\n" +"尝试重连！";
+                        connect();
+                    }
+                }
+            }
+        }
+        function sendmsg(msg){
+            if(!window.socket){
+                return;
+            }else{
+                if(socket.readyState == WebSocket.OPEN){
+                    socket.send(msg.value);
+                    msg.value="";
+                }else{
+                    alert("连接未开启！");
+                }
+            }
+        }
+    </script>
+</body>
+</html>

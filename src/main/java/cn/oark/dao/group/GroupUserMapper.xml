@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oark.dao.group.GroupUserMapper">
+
+    <select id="getGroupUserCount" resultType="java.lang.Integer">
+        select count(gu_uid)
+        from gu_user
+    </select>
+    <select id="getGroupUserStatus" resultType="java.lang.Integer" >
+        select count(gu_uid)
+        from gu_user
+        where gu_ulevel >= 8
+    </select>
+    <select id="getGroupUserStatusById" resultType="java.lang.Integer" parameterType="java.lang.String" >
+        select gu_ulevel
+        from gu_user
+        where gu_uid = #{gu_uid}
+    </select>
+    <select id="getSaltById" resultType="java.lang.String" parameterType="java.lang.String" >
+        select gu_usalt
+        from gu_user
+        where gu_uid = #{gu_uid}
+    </select>
+    <select id="verifyByid" resultType="cn.oark.utility.Sql.pojo.group.GroupUser" >
+        select gu_uid,gu_uname,gu_uaccount,gu_uaccount
+        from gu_user
+        where gu_uid = #{gu_uid} and gu_upwd = #{gu_upwd}
+    </select>
+    <select id="getInfoByid" resultType="cn.oark.utility.Sql.pojo.group.GroupUser" >
+        select gu_uid,gu_uname,gu_uaccount,gu_uaccount
+        from gu_user
+        where gu_uid = #{gu_uid}
+    </select>
+    <select id="getInfoByAccount" resultType="cn.oark.utility.Sql.pojo.group.GroupUser" >
+        select gu_uid,gu_uname,gu_uaccount,gu_uaccount
+        from gu_user
+        where gu_uaccount = #{gu_uaccount}
+    </select>
+    <select id="getAllGroupUser" resultType="cn.oark.utility.Sql.pojo.group.GroupUser" >
+        select gu_uid,gu_uname,gu_uaccount,gu_uaccount
+        from gu_user
+    </select>
+
+    <insert id="setNewGroupUser" parameterType="cn.oark.utility.Sql.pojo.group.GroupUser">
+        insert into gu_user (gu_uid,gu_uname,gu_uaccount,gu_ulevel,gu_upwd,gu_usalt)
+        values (#{gu_uid},#{gu_uname},#{gu_uaccount},#{gu_ulevel},#{gu_upwd},#{gu_usalt})
+    </insert>
+    <update id="setGroupUserInfo" parameterType="cn.oark.utility.Sql.pojo.group.GroupUser">
+        update gu_user set
+        gu_uname = #{gu_uname},
+        gu_uaccount = #{gu_uaccount},
+        gu_ulevel = #{gu_ulevel},
+        gu_upwd = #{gu_upwd},
+        gu_usalt = #{gu_usalt}
+        where gu_uid = #{gu_uid}
+    </update>
+
+
+
+
+
+</mapper>

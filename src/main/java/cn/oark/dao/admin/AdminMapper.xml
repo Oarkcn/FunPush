@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oark.dao.admin.AdminMapper">
+
+    <select id="getAdminCount" resultType="java.lang.Integer">
+        select count(ma_id)
+        from ma_admin
+    </select>
+    <select id="getAdminStatus" resultType="java.lang.Integer" >
+        select count(ma_id)
+        from ma_admin
+        where ma_status >= 8
+    </select>
+    <select id="getAdminStatusById" resultType="java.lang.Integer" parameterType="java.lang.String" >
+        select ma_status
+        from ma_admin
+        where ma_id = #{ma_id}
+    </select>
+    <select id="getSaltById" resultType="java.lang.String" parameterType="java.lang.String" >
+        select ma_salt
+        from ma_admin
+        where ma_id = #{ma_id}
+    </select>
+    <select id="verifyByid" resultType="cn.oark.utility.Sql.pojo.admin.Admin" >
+        select ma_id,ma_name,ma_account,ma_status
+        from ma_admin
+        where ma_id = #{ma_id} and ma_pwd = #{ma_pwd}
+    </select>
+    <select id="getInfoByid" resultType="cn.oark.utility.Sql.pojo.admin.Admin" >
+        select ma_id,ma_name,ma_account,ma_status
+        from ma_admin
+        where ma_id = #{ma_id}
+    </select>
+    <select id="getInfoByAccount" resultType="cn.oark.utility.Sql.pojo.admin.Admin" >
+        select ma_id,ma_name,ma_account,ma_status
+        from ma_admin
+        where ma_account = #{ma_account}
+    </select>
+    <select id="getAllAdmin" resultType="cn.oark.utility.Sql.pojo.admin.Admin" >
+        select ma_id,ma_name,ma_account,ma_status
+        from ma_admin
+    </select>
+
+    <insert id="setNewAdmin" parameterType="cn.oark.utility.Sql.pojo.admin.Admin">
+        insert into ma_admin (ma_id,ma_name,ma_account,ma_status,ma_pwd,ma_salt)
+        values (#{ma_id},#{ma_name},#{ma_account},#{ma_status},#{ma_pwd},#{ma_salt})
+    </insert>
+    <update id="setAdminInfo" parameterType="cn.oark.utility.Sql.pojo.admin.Admin">
+        update ma_admin set
+        ma_name = #{ma_name},
+        ma_pwd = #{ma_pwd},
+        ma_account = #{ma_account},
+        ma_status = #{ma_status},
+        ma_salt = #{ma_salt}
+        where ma_id = #{ma_id}
+    </update>
+
+
+
+
+
+</mapper>

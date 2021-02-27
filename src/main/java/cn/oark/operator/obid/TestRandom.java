@@ -10,7 +10,7 @@ public class TestRandom {
         String rand;
         Random r = new Random();
         rand =  Integer.toString(r.nextInt(1000));
-        rand= System.currentTimeMillis()+rand + SysConfig.workerID.toString();
+        rand = System.currentTimeMillis()+rand + SysConfig.workerID.toString();
         System.out.println(rand);
         return ;
     }

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oark.dao.group.GroupRelationMapper">
+
+    <select id="getGroupUserCount" resultType="java.lang.Integer">
+        select count(guid)
+        from gu_grouprelation
+    </select>
+    <select id="getPermissionByUid" resultType="java.lang.Integer" parameterType="java.lang.String" >
+        select permission
+        from gu_grouprelation
+        where uid = #{uid}
+    </select>
+    <select id="getGuidByUid" resultType="java.lang.String" >
+        select guid
+        from gu_grouprelation
+        where uid = #{uid}
+    </select>
+    <select id="getUidByGuid" resultType="java.lang.String" >
+        select uid
+        from gu_grouprelation
+        where guid = #{guid}
+    </select>
+    <select id="getUidByGuidWithPermission" resultType="cn.oark.utility.Sql.pojo.group.GroupRelation" >
+        select guid,uid,permission
+        from gu_grouprelation
+    </select>
+
+    <insert id="setNewRelation" parameterType="cn.oark.utility.Sql.pojo.group.GroupRelation">
+        insert into gu_grouprelation (guid,uid,permission)
+        values (#{guid},#{uid},#{permission})
+    </insert>
+
+    <update id="setRelationInfo" parameterType="cn.oark.utility.Sql.pojo.group.GroupRelation">
+        update gu_grouprelation set
+                            permission = #{permission}
+        where guid = #{guid} and uid = #{uid}
+    </update>
+    <delete id="deleteRelation" parameterType="cn.oark.utility.Sql.pojo.group.GroupRelation">
+        delete from gu_grouprelation where guid = #{guid} and uid = #{uid}
+    </delete>
+
+
+
+
+
+</mapper>

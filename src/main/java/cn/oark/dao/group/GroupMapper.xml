@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oark.dao.group.GroupMapper">
+
+    <select id="getGroupCount" resultType="java.lang.Integer">
+        select count(gu_guid)
+        from gu_group
+    </select>
+    <select id="getGroupStatus" resultType="java.lang.Integer" >
+        select count(gu_guid)
+        from gu_group
+        where gu_gustatus >= 8
+    </select>
+    <select id="getGroupStatusById" resultType="java.lang.Integer" parameterType="java.lang.String" >
+        select gu_gustatus
+        from gu_group
+        where gu_gustatus = #{gu_gustatus}
+    </select>
+    <select id="getInfoByid" resultType="cn.oark.utility.Sql.pojo.group.Group" >
+        select gu_guid,gu_guname,gu_gustatus
+        from gu_group
+        where gu_guid = #{ma_id}
+    </select>
+    <select id="getInfoByName" resultType="cn.oark.utility.Sql.pojo.group.Group" >
+        select gu_guid,gu_guname,gu_gustatus
+        from gu_group
+        where gu_guname = #{gu_guname}
+    </select>
+    <select id="getAllGroup" resultType="cn.oark.utility.Sql.pojo.group.Group" >
+        select gu_guid,gu_guname,gu_gustatus
+        from gu_group
+    </select>
+
+    <insert id="setNewGroup" parameterType="cn.oark.utility.Sql.pojo.group.Group">
+        insert into gu_group (gu_guid,gu_guname,gu_gustatus)
+        values (#{gu_guid},#{gu_guname},#{gu_gustatus})
+    </insert>
+
+    <update id="setGroupInfo" parameterType="cn.oark.utility.Sql.pojo.group.Group">
+        update gu_group set
+                            gu_guname = #{gu_guname},
+                            gu_gustatus = #{gu_guname}
+        where gu_guid = #{gu_guid}
+    </update>
+
+
+
+
+
+</mapper>

@@ -1,11 +1,13 @@
 package cn.oark.operator.obid;
 
 import cn.oark.utility.config.SysConfig;
+import cn.oark.utility.config.SysPart;
+import jdk.jfr.Unsigned;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.Random;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class SnowFlake {
 
@@ -26,20 +28,22 @@ public class SnowFlake {
     private final long maxDatacenterId = -1L ^ (-1L << datacenterIdBits);
 
     /** 序列在id中占的位数 */
-    private final long sequenceBits = 14L;
-
+    private final long sequenceBits = 9L;
+    /** 随机占的位数 */
+    private final long randomBit = 5L;
     /** 机器ID向左移14位 */
-    private final long workerIdShift = sequenceBits;
+    private final long workerIdShift = sequenceBits+randomBit;
 
     /** 数据标识id向左移18位(14+4) */
-    private final long datacenterIdShift = sequenceBits + workerIdBits;
+    private final long datacenterIdShift = sequenceBits + randomBit + workerIdBits;
 
     /** 时间截向左移22位(14+4+4) */
-    private final long timestampLeftShift = sequenceBits + workerIdBits + datacenterIdBits;
+    private final long timestampLeftShift = sequenceBits + randomBit + workerIdBits + datacenterIdBits;
 
-    /** 生成序列的掩码，这里为14bit 16384 */
+    /** 生成序列的掩码，这里为9bit 16384 */
     private final long sequenceMask = -1L ^ (-1L << sequenceBits);
-
+    /** 生成随机序列的掩码，这里与序列共享14位*/
+    private final long randomMask = (-1L ^ (-1L << (randomBit))) << sequenceBits;
     /** 工作机器ID(0~15) */
     private long workerId = SysConfig.workerID;
 
@@ -107,7 +111,8 @@ public class SnowFlake {
         return ((timestamp - twepoch) << timestampLeftShift) //
                 | (datacenterId << datacenterIdShift) //
                 | (workerId << workerIdShift) //
-                | sequence;
+                | sequence
+                | (((new Random()).nextInt()) & randomMask );//随机数填充
     }
     /**
      * 阻塞到下一个毫秒，直到获得新的时间戳
@@ -131,38 +136,97 @@ public class SnowFlake {
     }
 
     //==============================Test=============================================
-    /** 测试 */
-    public static void main(String[] args) {
-        SnowFlake idWorker = new SnowFlake(SysConfig.workerID, SysConfig.centerID);
-        Long start = System.currentTimeMillis();
-        ArrayList<SnowFlake> snowFlakeList = new ArrayList<>(SysConfig.obidThreadNum);
-        for (int snowFlakeListCount = 0;snowFlakeListCount < SysConfig.obidThreadNum ;snowFlakeListCount++){
-            snowFlakeList.add(new SnowFlake(snowFlakeListCount,SysConfig.centerID));
-        }
-        ExecutorService executorService = Executors.newFixedThreadPool(SysConfig.obidThreadNum);
-        for (int i = 0; i < 100000000; i++) {
+    /** 测试 已经弃用，改用下面的give方法 */
 
-            //executorService.execute(() ->{
-                Long id = snowFlakeList.get(i % 4).nextId();
+//    public static void main(String[] args) {
+//        SnowFlake idWorker = new SnowFlake(SysConfig.workerID, SysConfig.centerID);
+//        Long start = System.currentTimeMillis();
+//        ArrayList<SnowFlake> snowFlakeList = new ArrayList<>(SysConfig.obidThreadNum);
+//        for (int snowFlakeListCount = 0;snowFlakeListCount < SysConfig.obidThreadNum ;snowFlakeListCount++){
+//            snowFlakeList.add(new SnowFlake(snowFlakeListCount,SysConfig.centerID));
+//        }
+//        ExecutorService executorService = Executors.newFixedThreadPool(SysConfig.obidThreadNum);
+//        //ExecutorService executorService1 = new ThreadPoolExecutor(1,SysConfig.obidThreadNum,0L,TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(SysConfig.obidQueueNum));
+//        AtomicBoolean flag= new AtomicBoolean(false);
+//        for (int i = 0; i < 10000000; i++) {
+//            int finalI = i;
+//            /*flag.set(false);
+//
+//            while(!flag.get()){
+//                try{
+//                    executorService.execute(() ->{
+//                        Long id = snowFlakeList.get(finalI % SysConfig.obidThreadNum).nextId();
+//                        //System.out.println(Thread.currentThread().getName() + "，" + (System.currentTimeMillis()-start) + "ms 轮 执行" + Long.toHexString(id));
+//                        //System.out.println((System.currentTimeMillis()-start) + "ms  " +Long.toHexString(id) );
+//                        flag.set(true);
+//                    });
+//                }catch (RejectedExecutionException rejectedExecutionException){
+//                    try {
+//                        System.out.println("reject "+ finalI);
+//                        Thread.sleep(1);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }finally {
+//
+//                }
+//            }
+//
+//             */
+//            executorService.execute(() ->{
+//                Long id = snowFlakeList.get(finalI % SysConfig.obidThreadNum).nextId();
+//                SysPart.obidList2.add(id);
+//                //System.out.println(Thread.currentThread().getName() + "，" + (System.currentTimeMillis()-start) + "ms 轮 执行" + Long.toHexString(id));
+//                //System.out.println((System.currentTimeMillis()-start) + "ms  " +Long.toHexString(id) );
+//            });
+//            //long id = idWorker.nextId();
+//            //System.out.println(Long.toBinaryString(id));
+//            //System.out.println((System.currentTimeMillis()-start) + "ms  " +Long.toHexString(id) );
+//
+//        }
+//        executorService.shutdown();
+//        try {
+//            executorService.awaitTermination(200, TimeUnit.MINUTES);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println( (System.currentTimeMillis()-start) + "ms fini");
+//    }
+    /**     give方法，使用雪花算法多线程生成obid 具体参数见SysPart.java     **/
+    public String give(int num){
+        if(!SysConfig.isObidWorking) return "NoWorking";
+        ExecutorService executorService = SysPart.obidExecutorService;
+        Long start = System.currentTimeMillis();
+        for (int i = 0; i < num; i++) {
+            int finalI = i;
+            executorService.execute(() ->{
+                Long id = SysPart.snowFlakeList.get(finalI % SysConfig.obidThreadNum).nextId();
+                try {
+                    SysPart.obidList2.offer(id,1,TimeUnit.MINUTES);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 //System.out.println(Thread.currentThread().getName() + "，" + (System.currentTimeMillis()-start) + "ms 轮 执行" + Long.toHexString(id));
                 //System.out.println((System.currentTimeMillis()-start) + "ms  " +Long.toHexString(id) );
-
-            //});
-
-
-
-            //long id = idWorker.nextId();
-            //System.out.println(Long.toBinaryString(id));
-            //System.out.println((System.currentTimeMillis()-start) + "ms  " +Long.toHexString(id) );
-
+            });
         }
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(200, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println( (System.currentTimeMillis()-start) + "ms");
+        return ((System.currentTimeMillis()-start) + "ms fini");
+    }
+    public void give(){
+        ExecutorService executorService = SysPart.obidExecutorService;
+        //Long start = System.currentTimeMillis();
+        //for (int i = 0; i < num; i++) {
+        //    int finalI = i;
+            executorService.execute(() ->{
+                Long id = SysPart.snowFlakeList.get(((new Random().nextInt())>>>4)%SysConfig.obidThreadNum).nextId();
+                try {
+                    SysPart.obidList2.offer(id,1,TimeUnit.MINUTES);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //System.out.println(Thread.currentThread().getName() + "，" + (System.currentTimeMillis()-start) + "ms 轮 执行" + Long.toHexString(id));
+                //System.out.println((System.currentTimeMillis()-start) + "ms  " +Long.toHexString(id) );
+            });
     }
 
 }

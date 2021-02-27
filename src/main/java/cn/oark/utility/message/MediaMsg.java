@@ -1,10 +1,17 @@
 package cn.oark.utility.message;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 public class MediaMsg implements Message{
+    @JSONField(name="msgId", ordinal = 1)
     String msgId;
+    @JSONField(name="msgTime", ordinal = 2)
     Long msgTime;
+    @JSONField(name="msgTitle", ordinal = 3)
     String msgTitle;
+    @JSONField(name="msgContext", ordinal = 4)
     String msgContext;      //消息正文与标题 限制长度128+12K 多余截取
+    @JSONField(name="msgType", ordinal = 5)
     String msgType="Media";
     @Override
     public String getMsgId() {
